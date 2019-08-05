@@ -1,5 +1,6 @@
 package com.shendehai.com.web;
 
+import com.shendehai.com.Redis.RedisUtil;
 import com.shendehai.com.common.entity.Result;
 import com.shendehai.com.common.entity.Seckill;
 import com.shendehai.com.service.SeckillService;
@@ -25,6 +26,8 @@ public class SeckillController {
 
     @Autowired
     private SeckillService ss;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public String Toindex() {
@@ -61,12 +64,21 @@ public class SeckillController {
 
     @RequestMapping(value = "/{seckillId}/{md5}/execution")
     @ResponseBody
-    public Result excutekill(@PathVariable("seckillId") Long seckillId, @CookieValue("userPhone") String phone) {
-        Result result = ss.excuteSeckill(seckillId,phone);
-        return result;
-
+    public void excutekill(@PathVariable("seckillId") Long seckillId, @CookieValue("userPhone") String phone) {
+      ss.excuteSeckill(seckillId,phone);
     }
 
+    @RequestMapping(value ="/user/state")
+    @ResponseBody
+    public Result getkilluserstate(String phone){
+        Object o = redisUtil.get(phone);
+        if(o!=null){
+            System.out.println(o.toString());
+            return Result.ok(o);
+        }else{
+            return null;
+        }
+    }
 
     @RequestMapping(value = "/startkill")
     public Result start(long seckillId) {

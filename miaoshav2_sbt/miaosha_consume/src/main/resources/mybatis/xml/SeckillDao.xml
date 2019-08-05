@@ -3,7 +3,7 @@
   <mapper namespace="com.shendehaizi.mapper.SeckillDao">
 
 
-<select id="delSeckillone" parameterType="long">
+<update id="delSeckillone" parameterType="long">
 update seckill set number=number-1 where seckill_id=#{seckillId} and number>0;
-</select>
+</update>
   </mapper>

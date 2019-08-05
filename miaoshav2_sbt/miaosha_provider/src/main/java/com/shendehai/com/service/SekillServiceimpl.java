@@ -2,6 +2,7 @@ package com.shendehai.com.service;
 
 
 
+import com.shendehai.com.Redis.RedisUtil;
 import com.shendehai.com.activemq.ActivemqSend;
 import com.shendehai.com.common.entity.Result;
 import com.shendehai.com.common.entity.Seckill;
@@ -21,6 +22,8 @@ public class SekillServiceimpl implements SeckillService {
     private SeckillDao sd;
     @Autowired
     private ActivemqSend send;
+    @Autowired
+    private RedisUtil redisUtil;
 
     //设置资源池限流
     private static Semaphore resource = new Semaphore(500);
@@ -29,7 +32,12 @@ public class SekillServiceimpl implements SeckillService {
     public List<Seckill> getSeckillList() {
         // TODO Auto-generated method stub
         //返回秒杀商品页
-        return sd.queryAll();
+        List<Seckill> seckills = sd.queryAll();
+        for (Seckill s:seckills
+             ) {
+            redisUtil.set(s.getSeckillId()+"",s.getNumber());
+        }
+        return seckills;
     }
 
     @Override
@@ -58,26 +66,28 @@ public class SekillServiceimpl implements SeckillService {
     }
 
     @Override
-    public Result excuteSeckill(Long seckillId,String phone) {
+    public void excuteSeckill(Long seckillId,String phone) {
         // TODO Auto-generated method stub
 
         if (resource.getQueueLength() > 500) {
-
-            return Result.error("秒杀商品已被抢购光了!");
-
+            redisUtil.setnx(phone,"秒杀商品已被抢购光了!");
         } else {
             try {
                 resource.acquire();
-                SeckillMessage seckillMessage = new SeckillMessage();
-                seckillMessage.setSeckillId(seckillId.toString());
-                seckillMessage.setPhone(phone);
-                send.send(seckillMessage);
-                return null;
+                //通过redis达到预减的作用
+                long decr = redisUtil.decr(seckillId.toString(), 1l);
+                if(decr<0){
+                    redisUtil.setnx(phone,"秒杀商品已被抢购光了!");
+                }else {
+                    SeckillMessage seckillMessage = new SeckillMessage();
+                    seckillMessage.setSeckillId(seckillId.toString());
+                    seckillMessage.setPhone(phone);
+                    send.send(seckillMessage);
+                }
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
-
                 e.printStackTrace();
-                return Result.error("服务器繁忙-------");
+                redisUtil.setnx(phone,"服务器繁忙!");
             } finally {
                 resource.release();
             }

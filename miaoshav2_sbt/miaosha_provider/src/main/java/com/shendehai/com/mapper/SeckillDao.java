@@ -7,13 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface SeckillDao {
-    /* *
-     *减库存
-     * @param seckillId
-     * @param killTime
-     * @return如果影响行数> 1，表示更新的行数
-     */
-	int reduceitemnum(@Param("seckillId") long seckillId, @Param("killtime") Date killtime);
+
 	 /**
      * 根据ID查询秒杀对象
      * @param seckillId

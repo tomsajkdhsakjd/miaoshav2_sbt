@@ -21,7 +21,7 @@ public interface SeckillService {
 
     String MD5Url(long seckillId);
 
-    Result excuteSeckill(Long seckillId, String phone);
+    void excuteSeckill(Long seckillId, String phone);
 
 
 }

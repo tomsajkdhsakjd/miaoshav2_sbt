@@ -9,7 +9,4 @@ select * from seckill;
 <select id="querybyid" parameterType="long" resultType="com.shendehai.com.common.entity.Seckill">
 select * from seckill where seckill_id=#{seckillId};
 </select>
-<select id="delSeckillone" parameterType="long">
-update seckill set number=number-1 where seckill_id=#{seckillId} and number>0;
-</select>
   </mapper>

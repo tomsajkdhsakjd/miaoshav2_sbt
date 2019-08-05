@@ -40,10 +40,8 @@ var seckill={
 					console.log("inputPhone: " + inputPhone);
 					if (seckill.validataPhone(inputPhone)) {
 						//电话写入cookie(7天过期)
-						alert(333)
 						$.cookie('userPhone', inputPhone, {expires: 7, path: '/'});
 						//验证通过　　刷新页面
-						alert(3333)
 						window.location.reload();
 					} else {
 						//todo 错误文案信息抽取到前端字典里
@@ -78,23 +76,22 @@ var seckill={
         			//开启秒杀
                     //获取秒杀地址
                     var md5 = result['msg'];
-
+					var userPhone=$.cookie('userPhone');
                     var killUrl='/seckill/' + seckillId + '/' + md5 + '/execution';
                     //绑定一次点击事件
                     $('#killBtn').one('click', function () {
                         //执行秒杀请求
                         //1.先禁用按钮
+						$.get(killUrl, {})
 					var stop=window.setInterval(function () {
-
-							$.get(killUrl,
-								{},
+							$.get("/seckill/user/state",
+								{phone:userPhone},
 								function (result) {
 								console.log(result)
-									if (result && result['success']) {
-
-										if(result['successmiaosha']){
-											node.html('<button class="btn btn-primary btn-lg" id="killBtn1">请在3分钟内执行下单 </button>');
-
+									if (result && result['msg']) {
+										clearInterval(stop);
+										if(result['msg']=="秒杀成功"){
+											node.html('<button class="btn btn-primary btn-lg" id="killBtn1">秒杀成功!请在3分钟内执行下单 </button>');
 											$('#killBtn1').one('click', function () {
 												$.get('/seckill/'+seckillId+'/submitmessage',{},function(result){
 													node.show();
@@ -106,14 +103,12 @@ var seckill={
 
 										}else{
 											var data=result['data']
-											node.html('<span class="label label-success">' + data['stateInfo'] + '</span>');
+											node.html('<span class="label label-success">' + result['msg'] + '</span>');
 										}
 
 
 
 
-									}else {
-										//clearInterval(stop);
 									}
 								});
 						}, 1000);

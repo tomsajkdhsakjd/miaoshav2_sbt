@@ -1,4 +1,4 @@
-package com.shendehai.com.Redis;
+package com.shendehaizi.Redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
