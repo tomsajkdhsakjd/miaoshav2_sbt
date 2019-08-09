@@ -50,6 +50,15 @@ public class RedisUtil {
             return false;
         }
     }
+    public boolean setnx(String key, Object value,long time) {
+        try {
+            redisTemplate.opsForValue().setIfAbsent(key,value,time, TimeUnit.SECONDS);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     public boolean set(String key, Object value, long time) {
         try {
             if (time > 0) {

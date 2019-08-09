@@ -7,8 +7,12 @@ import com.shendehai.com.service.SeckillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -80,6 +84,22 @@ public class SeckillController {
         }
     }
 
+    @RequestMapping(value = "/user/login")
+    @ResponseBody
+    public Result login(String phone, HttpServletResponse response){
+        String s = UUID.randomUUID().toString();
+        boolean setnx = redisUtil.setnx(s,phone, 600);
+        Cookie token_id = new Cookie("token_id", s);
+        token_id.setPath("/");
+        response.addCookie(token_id);
+       return  Result.ok(s);
+    }
+    @RequestMapping(value = "/user/getloginstatus")
+    @ResponseBody
+    public Result getloginstatus(String tokenid){
+        Object o = redisUtil.get(tokenid);
+        return  Result.ok(o);
+    }
     @RequestMapping(value = "/startkill")
     public Result start(long seckillId) {
         int skillNum = 1000;
