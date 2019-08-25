@@ -23,6 +23,7 @@ var seckill={
         detail:{
         	init:function(){
 				var tokenid=$.cookie('token_id');
+				alert(tokenid)
 				$.get("/seckill/user/getloginstatus",{tokenid:tokenid},function (result) {
 					//验证绑定的手机
 					var token=result['msg']
@@ -77,7 +78,7 @@ var seckill={
         			//开启秒杀
                     //获取秒杀地址
                     var md5 = result['msg'];
-					var userPhone=$.cookie('userPhone');
+					var userPhone=$.cookie('token_id');
                     var killUrl='/seckill/' + seckillId + '/' + md5 + '/execution';
                     //绑定一次点击事件
                     $('#killBtn').one('click', function () {

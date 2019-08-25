@@ -43,6 +43,9 @@ public class RedisUtil {
     }
     public boolean setnx(String key, Object value) {
         try {
+            if(key==null){
+                return false;
+            }
             redisTemplate.opsForValue().setIfAbsent(key,value);
             return true;
         } catch (Exception e) {

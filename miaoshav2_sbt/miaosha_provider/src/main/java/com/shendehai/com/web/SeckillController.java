@@ -1,8 +1,10 @@
 package com.shendehai.com.web;
 
 import com.shendehai.com.Redis.RedisUtil;
+import com.shendehai.com.annotion.AccessLimit;
 import com.shendehai.com.common.entity.Result;
 import com.shendehai.com.common.entity.Seckill;
+import com.shendehai.com.locks.Locker;
 import com.shendehai.com.service.SeckillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,6 +34,8 @@ public class SeckillController {
     private SeckillService ss;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private Locker locker;
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public String Toindex() {
@@ -41,7 +45,6 @@ public class SeckillController {
     @ResponseBody
     @RequestMapping(value = "/seckillPage/list")
     public Result getSeckillList() {
-        System.out.println(999);
         List<Seckill> list = ss.getSeckillList();
         Result ok = Result.ok(list);
         System.out.println(ok);
@@ -68,38 +71,47 @@ public class SeckillController {
 
     @RequestMapping(value = "/{seckillId}/{md5}/execution")
     @ResponseBody
-    public void excutekill(@PathVariable("seckillId") Long seckillId, @CookieValue("userPhone") String phone) {
-      ss.excuteSeckill(seckillId,phone);
+    @AccessLimit(maxCount = 1)
+    public void excutekill(@PathVariable("seckillId") Long seckillId, @CookieValue("token_id") String phone) {
+        while(locker.isLocked("lock_key")) {
+            System.out.println("上面有锁");
+
+        }
+            ss.excuteSeckill(seckillId, phone);
+
     }
 
-    @RequestMapping(value ="/user/state")
+    @RequestMapping(value = "/user/state")
     @ResponseBody
-    public Result getkilluserstate(String phone){
+    public Result getkilluserstate(String phone) {
         Object o = redisUtil.get(phone);
-        if(o!=null){
-            System.out.println(o.toString());
-            return Result.ok(o);
-        }else{
+        Object o1 = redisUtil.get((String) o);
+        if (o != null) {
+            return Result.ok(o1);
+        } else {
             return null;
         }
     }
 
     @RequestMapping(value = "/user/login")
     @ResponseBody
-    public Result login(String phone, HttpServletResponse response){
+    public Result login(String phone, HttpServletResponse response) {
         String s = UUID.randomUUID().toString();
-        boolean setnx = redisUtil.setnx(s,phone, 600);
+        boolean setnx = redisUtil.setnx(s, phone, 6000);
         Cookie token_id = new Cookie("token_id", s);
         token_id.setPath("/");
+        token_id.setMaxAge(6000);
         response.addCookie(token_id);
-       return  Result.ok(s);
+        return Result.ok(s);
     }
+
     @RequestMapping(value = "/user/getloginstatus")
     @ResponseBody
-    public Result getloginstatus(String tokenid){
+    public Result getloginstatus(String tokenid) {
         Object o = redisUtil.get(tokenid);
-        return  Result.ok(o);
+        return Result.ok(o);
     }
+
     @RequestMapping(value = "/startkill")
     public Result start(long seckillId) {
         int skillNum = 1000;

@@ -29,7 +29,6 @@ public class ActivemqConsume {
                 seckillMessage = (SeckillMessage) objectMessage.getObject();
                 System.out.println(seckillMessage);
                 orderSerivce.excultdelseckill(seckillMessage);
-                int i=1/0;
                 m.acknowledge();
             } catch (Exception e) {
                 session.recover();// 此不可省略 重发信息使用
