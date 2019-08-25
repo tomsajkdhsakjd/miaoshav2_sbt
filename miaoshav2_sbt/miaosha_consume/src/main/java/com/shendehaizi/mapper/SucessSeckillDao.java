@@ -12,5 +12,6 @@ public interface SucessSeckillDao {
      */
 	public int insertSucessKilled(@Param("seckillId") long seckillId, @Param("userPhone") long userPhone);
 
-		
+
+    void delnotpayorder(Integer seckild_id);
 }

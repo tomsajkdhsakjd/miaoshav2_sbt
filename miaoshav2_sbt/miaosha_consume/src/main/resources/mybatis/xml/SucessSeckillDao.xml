@@ -4,4 +4,7 @@
     <insert id="insertSucessKilled" parameterType="long">
    insert ignore into success_killed(seckill_id,user_phone) values(#{seckillId},#{userPhone})
 </insert>
+    <delete id="delnotpayorder" parameterType="int">
+        delete from success_killed where seckill_id=#{seckill_id}
+    </delete>
 </mapper>

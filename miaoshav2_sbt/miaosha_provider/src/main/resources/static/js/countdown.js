@@ -22,25 +22,27 @@ var seckill={
 		 //详情页秒杀逻辑
         detail:{
         	init:function(){
-				var userPhone=$.cookie('userPhone');
+				var tokenid=$.cookie('token_id');
+				alert(tokenid)
+				$.get("/seckill/user/getloginstatus",{tokenid:tokenid},function (result) {
+					//验证绑定的手机
+					var token=result['msg']
+					if(token==null){
+						//绑定手机 控制输出
+						var killPhoneModal = $('#killPhoneModal');
+						killPhoneModal.modal({
+							show: true,//显示弹出层
+							backdrop: 'static',//禁止位置关闭
+							keyboard: false//关闭键盘事件
+						});
+					}
+				})
 
-				//验证绑定的手机
-				if(!seckill.validataPhone(userPhone)){
-
-					//绑定手机 控制输出
-					var killPhoneModal = $('#killPhoneModal');
-					killPhoneModal.modal({
-						show: true,//显示弹出层
-						backdrop: 'static',//禁止位置关闭
-						keyboard: false//关闭键盘事件
-					});
-				}
 				$('#killPhoneBtn').click(function () {
 					var inputPhone = $('#killphoneKey').val();
 					console.log("inputPhone: " + inputPhone);
 					if (seckill.validataPhone(inputPhone)) {
-						//电话写入cookie(7天过期)
-						$.cookie('userPhone', inputPhone, {expires: 7, path: '/'});
+					$.post("/seckill/user/login",{phone:inputPhone})
 						//验证通过　　刷新页面
 						window.location.reload();
 					} else {
@@ -76,7 +78,7 @@ var seckill={
         			//开启秒杀
                     //获取秒杀地址
                     var md5 = result['msg'];
-					var userPhone=$.cookie('userPhone');
+					var userPhone=$.cookie('token_id');
                     var killUrl='/seckill/' + seckillId + '/' + md5 + '/execution';
                     //绑定一次点击事件
                     $('#killBtn').one('click', function () {
