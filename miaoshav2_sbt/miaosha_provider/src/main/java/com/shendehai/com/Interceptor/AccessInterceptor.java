@@ -14,7 +14,7 @@ import java.util.concurrent.Semaphore;
 
 @Configuration
 public class AccessInterceptor extends HandlerInterceptorAdapter {
-    //设置资源池限流
+    //设置资源池限流ce
     private static Semaphore resource = new Semaphore(500);
     @Autowired
     private RedisUtil redisUtil;
